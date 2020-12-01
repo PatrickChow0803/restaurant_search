@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await DotEnv().load('.env');
   runApp(RestaurantSearchApp());
 }
 
@@ -72,7 +74,9 @@ class _SearchPage extends State<SearchPage> {
                     height: 50,
                     width: double.infinity,
                     child: RawMaterialButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        String key = DotEnv().env['ZOMATO_API_KEY'];
+                        print(key);
                         final isValid = _formKey.currentState.validate();
                         if (isValid) {
                         } else {
