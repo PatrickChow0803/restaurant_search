@@ -43,7 +43,7 @@ class _SearchPage extends State<SearchPage> {
     final response = await widget.dio.get('', queryParameters: {
       'q': query,
     });
-//    print(response);
+    print(response);
     setState(() {
       _restaurants = response.data['restaurants'];
     });
@@ -61,9 +61,24 @@ class _SearchPage extends State<SearchPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SearchForm(onSearch: searchRestaurants),
-            _restaurants != null
-                ? Text('Got ${_restaurants.length} results')
-                : Text('No results to display')
+            _restaurants == null
+                ? Text('No results to display')
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: _restaurants.length,
+                      itemBuilder: (_, index) {
+                        return ListTile(
+                          // https://developers.zomato.com/api/v2.1/search?q=Pizza
+                          // Type that into PostMan for reference
+                          title: Text(_restaurants[index]['restaurant']['name']),
+                          subtitle: Text(_restaurants[index]['restaurant']['location']['address']),
+                          trailing: Text(
+                              '${_restaurants[index]['restaurant']['user_rating']['aggregate_rating']} Stars, '
+                              '${_restaurants[index]['restaurant']['all_reviews_count']} Reviews'),
+                        );
+                      },
+                    ),
+                  ),
           ],
         ),
       ),
@@ -87,63 +102,66 @@ class _SearchFormState extends State<SearchForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      // without this automalidateMode, the 'Please enter a search term' messages wouldn't appear
-      autovalidateMode: _autoValidate,
-      child: Column(
-        children: [
-          TextFormField(
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Enter Search',
-                border: OutlineInputBorder(),
-                filled: true,
-                errorStyle: TextStyle(fontSize: 15)),
-            // value is the callback's value that is given when the validator triggers
-            validator: (value) {
-              if (value.isEmpty) {
-                return ('Please enter a search term');
-              }
-              if (value == 'a') {
-                return ('test');
-              }
-              return null;
-            },
-            // value is the callback's value that is given when the text changes
-            onChanged: (value) {
-              _search = value;
-            },
-          ),
-          SizedBox(height: 10.0),
-          Container(
-            height: 50,
-            width: double.infinity,
-            child: RawMaterialButton(
-              onPressed: () async {
-                String key = DotEnv().env['ZOMATO_API_KEY'];
-                print(key);
-                final isValid = _formKey.currentState.validate();
-                if (isValid) {
-                  widget.onSearch(_search);
-                } else {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Form(
+        key: _formKey,
+        // without this automalidateMode, the 'Please enter a search term' messages wouldn't appear
+        autovalidateMode: _autoValidate,
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Enter Search',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  errorStyle: TextStyle(fontSize: 15)),
+              // value is the callback's value that is given when the validator triggers
+              validator: (value) {
+                if (value.isEmpty) {
+                  return ('Please enter a search term');
+                }
+                if (value == 'a') {
+                  return ('test');
+                }
+                return null;
+              },
+              // value is the callback's value that is given when the text changes
+              onChanged: (value) {
+                _search = value;
+              },
+            ),
+            SizedBox(height: 10.0),
+            Container(
+              height: 50,
+              width: double.infinity,
+              child: RawMaterialButton(
+                onPressed: () async {
+                  String key = DotEnv().env['ZOMATO_API_KEY'];
+                  print(key);
+                  final isValid = _formKey.currentState.validate();
+                  if (isValid) {
+                    widget.onSearch(_search);
+                  } else {
 //                          setState(() {
 //                            _autoValidate = AutovalidateMode.always;
 //                          });
-                }
-              },
-              fillColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: Text(
-                'Search',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
+                  }
+                },
+                fillColor: Colors.red,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  'Search',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
                 ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
