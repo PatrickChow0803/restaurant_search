@@ -58,11 +58,30 @@ class _SearchPage extends State<SearchPage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SearchForm(onSearch: searchRestaurants),
-            _restaurants == null
-                ? Text('No results to display')
+            _restaurants == null || _restaurants.isEmpty
+                ? Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search,
+                          size: 110,
+                          color: Colors.black12,
+                        ),
+                        Text(
+                          'No results to display',
+                          style: TextStyle(
+                            color: Colors.black12,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                 : Expanded(
                     child: ListView.builder(
                       itemCount: _restaurants.length,
