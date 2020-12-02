@@ -36,17 +36,15 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPage extends State<SearchPage> {
-  List _restaurants = [];
+  String query;
 
-  void searchRestaurants(String query) async {
+  Future<List> searchRestaurants(String query) async {
     // pass in an empty string here because the BaseOptions already has the baseUrl
     final response = await widget.dio.get('', queryParameters: {
       'q': query,
     });
     print(response);
-    setState(() {
-      _restaurants = response.data['restaurants'];
-    });
+    return response.data['restaurants'];
   }
 
   @override
@@ -60,8 +58,12 @@ class _SearchPage extends State<SearchPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SearchForm(onSearch: searchRestaurants),
-            _restaurants == null || _restaurants.isEmpty
+            SearchForm(onSearch: (q) {
+              setState(() {
+                query = q;
+              });
+            }),
+            query == null
                 ? Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -82,22 +84,36 @@ class _SearchPage extends State<SearchPage> {
                       ],
                     ),
                   )
-                : Expanded(
-                    child: ListView.builder(
-                      itemCount: _restaurants.length,
-                      itemBuilder: (_, index) {
-                        return ListTile(
-                          // https://developers.zomato.com/api/v2.1/search?q=Pizza
-                          // Type that into PostMan for reference
-                          title: Text(_restaurants[index]['restaurant']['name']),
-                          subtitle: Text(_restaurants[index]['restaurant']['location']['address']),
-                          trailing: Text(
-                              '${_restaurants[index]['restaurant']['user_rating']['aggregate_rating']} Stars, '
-                              '${_restaurants[index]['restaurant']['all_reviews_count']} Reviews'),
+                : FutureBuilder(
+                    future: searchRestaurants(query),
+                    builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(
+                            margin: EdgeInsets.only(top: 100.0),
+                            child: Center(child: CircularProgressIndicator()));
+                      }
+                      if (snapshot.hasData) {
+                        return Expanded(
+                          child: ListView.builder(
+                            itemCount: snapshot.data.length,
+                            itemBuilder: (_, index) {
+                              return ListTile(
+                                // https://developers.zomato.com/api/v2.1/search?q=Pizza
+                                // Type that into PostMan for reference
+                                title: Text(snapshot.data[index]['restaurant']['name']),
+                                subtitle:
+                                    Text(snapshot.data[index]['restaurant']['location']['address']),
+                                trailing: Text(
+                                    '${snapshot.data[index]['restaurant']['user_rating']['aggregate_rating']} Stars, '
+                                    '${snapshot.data[index]['restaurant']['all_reviews_count']} Reviews'),
+                              );
+                            },
+                          ),
                         );
-                      },
-                    ),
-                  ),
+                      }
+                      return Text('Error retriving results: ${snapshot.error}');
+                    },
+                  )
           ],
         ),
       ),
