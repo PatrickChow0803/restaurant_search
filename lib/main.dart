@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:restaurant_search/model/restaurant.dart';
 
 void main() async {
   await DotEnv().load('.env');
@@ -95,15 +96,14 @@ class _SearchPage extends State<SearchPage> {
                           child: ListView.builder(
                             itemCount: snapshot.data.length,
                             itemBuilder: (_, index) {
+                              final restaurant = Restaurant(snapshot.data[index]);
                               return ListTile(
                                 // https://developers.zomato.com/api/v2.1/search?q=Pizza
                                 // Type that into PostMan for reference
-                                title: Text(snapshot.data[index]['restaurant']['name']),
-                                subtitle:
-                                    Text(snapshot.data[index]['restaurant']['location']['address']),
-                                trailing: Text(
-                                    '${snapshot.data[index]['restaurant']['user_rating']['aggregate_rating']} Stars, '
-                                    '${snapshot.data[index]['restaurant']['all_reviews_count']} Reviews'),
+                                title: Text(restaurant.name),
+                                subtitle: Text(restaurant.address),
+                                trailing: Text('${restaurant.rating} Stars, '
+                                    '${restaurant.reviews} Reviews'),
                               );
                             },
                           ),
