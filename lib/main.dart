@@ -88,9 +88,7 @@ class _SearchPage extends State<SearchPage> {
                     future: searchRestaurants(query),
                     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container(
-                            margin: EdgeInsets.only(top: 100.0),
-                            child: Center(child: CircularProgressIndicator()));
+                        return Expanded(child: Center(child: CircularProgressIndicator()));
                       }
                       if (snapshot.hasData) {
                         return Expanded(
