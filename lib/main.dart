@@ -1,113 +1,187 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  await DotEnv().load('.env');
+  runApp(RestaurantSearchApp());
 }
 
-class MyApp extends StatelessWidget {
+class RestaurantSearchApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: SearchPage(title: 'Restaurant App'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+class SearchPage extends StatefulWidget {
+  SearchPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
+  // Look at https://developers.zomato.com/documentation#!/restaurant for documentation reference
+  final dio = Dio(BaseOptions(
+      baseUrl: 'https://developers.zomato.com/api/v2.1/search',
+      headers: {'user-key': DotEnv().env['ZOMATO_API_KEY']}));
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _SearchPage createState() => _SearchPage();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _SearchPage extends State<SearchPage> {
+  List _restaurants = [];
 
-  void _incrementCounter() {
+  void searchRestaurants(String query) async {
+    // pass in an empty string here because the BaseOptions already has the baseUrl
+    final response = await widget.dio.get('', queryParameters: {
+      'q': query,
+    });
+    print(response);
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _restaurants = response.data['restaurants'];
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        backgroundColor: Colors.red,
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SearchForm(onSearch: searchRestaurants),
+            _restaurants == null || _restaurants.isEmpty
+                ? Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search,
+                          size: 110,
+                          color: Colors.black12,
+                        ),
+                        Text(
+                          'No results to display',
+                          style: TextStyle(
+                            color: Colors.black12,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: _restaurants.length,
+                      itemBuilder: (_, index) {
+                        return ListTile(
+                          // https://developers.zomato.com/api/v2.1/search?q=Pizza
+                          // Type that into PostMan for reference
+                          title: Text(_restaurants[index]['restaurant']['name']),
+                          subtitle: Text(_restaurants[index]['restaurant']['location']['address']),
+                          trailing: Text(
+                              '${_restaurants[index]['restaurant']['user_rating']['aggregate_rating']} Stars, '
+                              '${_restaurants[index]['restaurant']['all_reviews_count']} Reviews'),
+                        );
+                      },
+                    ),
+                  ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class SearchForm extends StatefulWidget {
+  final void Function(String search) onSearch;
+
+  const SearchForm({Key key, this.onSearch}) : super(key: key);
+
+  @override
+  _SearchFormState createState() => _SearchFormState();
+}
+
+class _SearchFormState extends State<SearchForm> {
+  final _formKey = GlobalKey<FormState>();
+  var _autoValidate = AutovalidateMode.onUserInteraction;
+  var _search;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Form(
+        key: _formKey,
+        // without this automalidateMode, the 'Please enter a search term' messages wouldn't appear
+        autovalidateMode: _autoValidate,
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Enter Search',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  errorStyle: TextStyle(fontSize: 15)),
+              // value is the callback's value that is given when the validator triggers
+              validator: (value) {
+                if (value.isEmpty) {
+                  return ('Please enter a search term');
+                }
+                if (value == 'a') {
+                  return ('test');
+                }
+                return null;
+              },
+              // value is the callback's value that is given when the text changes
+              onChanged: (value) {
+                _search = value;
+              },
+            ),
+            SizedBox(height: 10.0),
+            Container(
+              height: 50,
+              width: double.infinity,
+              child: RawMaterialButton(
+                onPressed: () async {
+                  String key = DotEnv().env['ZOMATO_API_KEY'];
+                  print(key);
+                  final isValid = _formKey.currentState.validate();
+                  if (isValid) {
+                    widget.onSearch(_search);
+                  } else {
+//                          setState(() {
+//                            _autoValidate = AutovalidateMode.always;
+//                          });
+                  }
+                },
+                fillColor: Colors.red,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  'Search',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
