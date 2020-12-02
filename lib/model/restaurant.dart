@@ -20,5 +20,5 @@ class Restaurant {
       locality: json['restaurant']['location']['locality'],
       rating: json['restaurant']['user_rating']['aggregate_rating']?.toString(),
       reviews: json['restaurant']['all_reviews_count'],
-      thumbnail: json['restaurant']['featured_image'] ?? json['restaurant']['thumb']);
+      thumbnail: json['restaurant']['featured_image'] ?? 'https://placehold.it/100x100');
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:restaurant_search/model/restaurant.dart';
+import 'package:restaurant_search/screen_widget/restaurant_item.dart';
 
 void main() async {
   await DotEnv().load('.env');
@@ -97,14 +98,7 @@ class _SearchPage extends State<SearchPage> {
                             itemCount: snapshot.data.length,
                             itemBuilder: (_, index) {
                               final restaurant = Restaurant(snapshot.data[index]);
-                              return ListTile(
-                                // https://developers.zomato.com/api/v2.1/search?q=Pizza
-                                // Type that into PostMan for reference
-                                title: Text(restaurant.name),
-                                subtitle: Text(restaurant.address),
-                                trailing: Text('${restaurant.rating} Stars, '
-                                    '${restaurant.reviews} Reviews'),
-                              );
+                              return RestaurantItem(restaurant: restaurant);
                             },
                           ),
                         );
