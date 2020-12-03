@@ -10,6 +10,10 @@ class SearchFilterScreen extends StatefulWidget {
 class _SearchFilterScreen extends State<SearchFilterScreen> {
   List<Category> _categories;
 
+  // Type is int because _categories.id is an int
+  // Therefore this _selectedCategories contains a list of category ids
+  List<int> _selectedCategories = [];
+
   // https://developers.zomato.com/api/v2.1/categories
   // Look at the above for reference, might also want to look up the dio instance below
   Future<List<Category>> getCategories() async {
@@ -67,7 +71,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                           spacing: 10,
                           children: List<Widget>.generate(_categories.length, (index) {
                             final category = _categories[index];
-                            final isSelected = index % 2 == 0;
+                            final isSelected = _selectedCategories.contains(category.id);
                             return FilterChip(
                               label: Text(category.name),
                               labelStyle: TextStyle(
@@ -78,7 +82,15 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                               ),
                               selected: isSelected,
                               checkmarkColor: Colors.white,
-                              onSelected: (bool selected) {},
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  if (selected)
+                                    _selectedCategories.add(category.id);
+                                  else {
+                                    _selectedCategories.remove(category.id);
+                                  }
+                                });
+                              },
                             );
                           }),
                         )
