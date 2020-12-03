@@ -8,16 +8,35 @@ class SearchFilterScreen extends StatefulWidget {
 }
 
 class _SearchFilterScreen extends State<SearchFilterScreen> {
+  List<Category> _categories;
 
   // https://developers.zomato.com/api/v2.1/categories
-  // Look at the above for reference
+  // Look at the above for reference, might also want to look up the dio instance below
   Future<List<Category>> getCategories() async {
     final response = await dio.get('categories');
     final data = response.data['categories'];
 
     // Map data's data into a new Category object for each object inside of data.
-    return data.map<Category>(
-        (json) => Category(id: json['categories']['id'], name: json['categories']['name']));
+    return data
+        .map<Category>((json) => Category(
+              id: json['categories']['id'],
+              name: json['categories']['name'],
+            ))
+        .toList();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // Once you retrieved the categories, call setState since the UI is changing.
+    // I know that .then((categories) is a List of categories because that's the return type of getCategories()
+    // The return type is also no longer a Future because .then is called.
+    getCategories().then((categories) {
+      setState(() {
+        _categories = categories;
+      });
+    });
   }
 
   @override
@@ -40,25 +59,33 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                     'Categories',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  Wrap(
-                    // The spacing between the childen
-                    spacing: 10,
-                    children: List<Widget>.generate(10, (index) {
-                      final isSelected = index % 2 == 0;
-                      return FilterChip(
-                        label: Text('Category $index'),
-                        labelStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? Colors.white
-                              : Theme.of(context).textTheme.bodyText1.color,
-                        ),
-                        selected: isSelected,
-                        checkmarkColor: Colors.white,
-                        onSelected: (bool selected) {},
-                      );
-                    }),
-                  )
+                  // Because you have to wait for _categories to get it's value from an async method,
+                  // use this check to display a loading indicator until _categories is initialized
+                  _categories is List<Category>
+                      ? Wrap(
+                          // The spacing between the childen
+                          spacing: 10,
+                          children: List<Widget>.generate(_categories.length, (index) {
+                            final category = _categories[index];
+                            final isSelected = index % 2 == 0;
+                            return FilterChip(
+                              label: Text(category.name),
+                              labelStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Theme.of(context).textTheme.bodyText1.color,
+                              ),
+                              selected: isSelected,
+                              checkmarkColor: Colors.white,
+                              onSelected: (bool selected) {},
+                            );
+                          }),
+                        )
+                      : Container(
+                          height: MediaQuery.of(context).size.height * .70,
+//                          width: double.infinity,
+                          child: Center(child: CircularProgressIndicator())),
                 ],
               ),
             ),

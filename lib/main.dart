@@ -12,7 +12,7 @@ void main() async {
 
 // Look at https://developers.zomato.com/documentation#!/restaurant for documentation reference
 final dio = Dio(BaseOptions(
-    baseUrl: 'https://developers.zomato.com/api/v2.1',
+    baseUrl: 'https://developers.zomato.com/api/v2.1/',
     headers: {'user-key': DotEnv().env['ZOMATO_API_KEY']}));
 
 class RestaurantSearchApp extends StatelessWidget {
