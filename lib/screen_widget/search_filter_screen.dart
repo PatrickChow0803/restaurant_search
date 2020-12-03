@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_search/main.dart';
 import 'package:restaurant_search/model/category.dart';
+import 'package:restaurant_search/model/search_options.dart';
 
 class SearchFilterScreen extends StatefulWidget {
   @override
@@ -9,6 +10,8 @@ class SearchFilterScreen extends StatefulWidget {
 
 class _SearchFilterScreen extends State<SearchFilterScreen> {
   List<Category> _categories;
+
+  SearchOptions _searchOptions = SearchOptions();
 
   // Type is int because _categories.id is an int
   // Therefore this _selectedCategories contains a list of category ids
@@ -33,6 +36,8 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+//    _searchOptions = SearchOptions();
     // Once you retrieved the categories, call setState since the UI is changing.
     // I know that .then((categories) is a List of categories because that's the return type of getCategories()
     // The return type is also no longer a Future because .then is called.
@@ -71,7 +76,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                           spacing: 10,
                           children: List<Widget>.generate(_categories.length, (index) {
                             final category = _categories[index];
-                            final isSelected = _selectedCategories.contains(category.id);
+                            final isSelected = _searchOptions.categories.contains(category.id);
                             return FilterChip(
                               label: Text(category.name),
                               labelStyle: TextStyle(
@@ -81,13 +86,14 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                                     : Theme.of(context).textTheme.bodyText1.color,
                               ),
                               selected: isSelected,
-                              checkmarkColor: Colors.white,
+                              showCheckmark: false,
+                              selectedColor: Colors.orange,
                               onSelected: (bool selected) {
                                 setState(() {
                                   if (selected)
-                                    _selectedCategories.add(category.id);
+                                    _searchOptions.categories.add(category.id);
                                   else {
-                                    _selectedCategories.remove(category.id);
+                                    _searchOptions.categories.remove(category.id);
                                   }
                                 });
                               },
