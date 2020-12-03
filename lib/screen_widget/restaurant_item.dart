@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:restaurant_search/model/restaurant.dart';
 
 class RestaurantItem extends StatelessWidget {
@@ -50,7 +51,15 @@ class RestaurantItem extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 5),
-                  Text(restaurant.rating),
+                  RatingBarIndicator(
+                    rating: double.parse(restaurant.rating),
+                    itemBuilder: (_, index) {
+                      return Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
