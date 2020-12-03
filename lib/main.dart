@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:restaurant_search/model/restaurant.dart';
 import 'package:restaurant_search/screen_widget/restaurant_item.dart';
+import 'package:restaurant_search/screen_widget/search_filter_screen.dart';
 
 void main() async {
   await DotEnv().load('.env');
@@ -44,6 +45,7 @@ class _SearchPage extends State<SearchPage> {
     // pass in an empty string here because the BaseOptions already has the baseUrl
     final response = await widget.dio.get('', queryParameters: {
       'q': query,
+      'sort': 'rating',
     });
     print(response);
     return response.data['restaurants'];
@@ -53,8 +55,23 @@ class _SearchPage extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.red,
+        actions: [
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => SearchFilterScreen()));
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Icon(Icons.tune),
+            ),
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -170,8 +187,9 @@ class _SearchFormState extends State<SearchForm> {
                   final isValid = _formKey.currentState.validate();
                   if (isValid) {
                     widget.onSearch(_search);
-                    // Gets rid of the soft keyboard after clicking on the button
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                    // Gets rid of the soft keyboard after clicking on the button, either way work
+//                    FocusScope.of(context).requestFocus(new FocusNode());
+                    FocusManager.instance.primaryFocus.unfocus();
                   } else {
 //                          setState(() {
 //                            _autoValidate = AutovalidateMode.always;
