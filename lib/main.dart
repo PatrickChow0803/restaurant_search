@@ -10,6 +10,11 @@ void main() async {
   runApp(RestaurantSearchApp());
 }
 
+// Look at https://developers.zomato.com/documentation#!/restaurant for documentation reference
+final dio = Dio(BaseOptions(
+    baseUrl: 'https://developers.zomato.com/api/v2.1',
+    headers: {'user-key': DotEnv().env['ZOMATO_API_KEY']}));
+
 class RestaurantSearchApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -29,11 +34,6 @@ class SearchPage extends StatefulWidget {
 
   final String title;
 
-  // Look at https://developers.zomato.com/documentation#!/restaurant for documentation reference
-  final dio = Dio(BaseOptions(
-      baseUrl: 'https://developers.zomato.com/api/v2.1/search',
-      headers: {'user-key': DotEnv().env['ZOMATO_API_KEY']}));
-
   @override
   _SearchPage createState() => _SearchPage();
 }
@@ -43,7 +43,7 @@ class _SearchPage extends State<SearchPage> {
 
   Future<List> searchRestaurants(String query) async {
     // pass in an empty string here because the BaseOptions already has the baseUrl
-    final response = await widget.dio.get('', queryParameters: {
+    final response = await dio.get('search', queryParameters: {
       'q': query,
       'sort': 'rating',
     });
