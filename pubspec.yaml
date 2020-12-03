@@ -30,6 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.1
   flutter_dotenv: ^2.1.0
   dio: ^3.0.10
+  flutter_rating_bar: ^3.2.0+1
 
 dev_dependencies:
   flutter_test:
