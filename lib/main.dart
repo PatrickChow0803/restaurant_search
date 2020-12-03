@@ -170,6 +170,8 @@ class _SearchFormState extends State<SearchForm> {
                   final isValid = _formKey.currentState.validate();
                   if (isValid) {
                     widget.onSearch(_search);
+                    // Gets rid of the soft keyboard after clicking on the button
+                    FocusScope.of(context).requestFocus(new FocusNode());
                   } else {
 //                          setState(() {
 //                            _autoValidate = AutovalidateMode.always;

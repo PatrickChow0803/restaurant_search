@@ -12,6 +12,7 @@ class RestaurantItem extends StatelessWidget {
       child: Row(
         children: [
           restaurant.thumbnail != null && restaurant.thumbnail.isNotEmpty
+              // This only displays the image that should be shown for the restaurant
               ? Ink(
                   height: 100,
                   width: 100,
@@ -25,6 +26,35 @@ class RestaurantItem extends StatelessWidget {
                   color: Colors.blueGrey,
                   child: Icon(Icons.restaurant, size: 30, color: Colors.white),
                 ),
+          // This widget prevents overflow by having the text shift to the next line if there's too much
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    restaurant.name,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    // makes overflow text into triple dots
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 7),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Colors.redAccent,
+                      ),
+                      Text(restaurant.locality),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  Text(restaurant.rating),
+                ],
+              ),
+            ),
+          )
         ],
       ),
     );
