@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_search/main.dart';
+import 'package:restaurant_search/model/category.dart';
 
 class SearchFilterScreen extends StatefulWidget {
   @override
@@ -6,6 +8,18 @@ class SearchFilterScreen extends StatefulWidget {
 }
 
 class _SearchFilterScreen extends State<SearchFilterScreen> {
+
+  // https://developers.zomato.com/api/v2.1/categories
+  // Look at the above for reference
+  Future<List<Category>> getCategories() async {
+    final response = await dio.get('categories');
+    final data = response.data['categories'];
+
+    // Map data's data into a new Category object for each object inside of data.
+    return data.map<Category>(
+        (json) => Category(id: json['categories']['id'], name: json['categories']['name']));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
