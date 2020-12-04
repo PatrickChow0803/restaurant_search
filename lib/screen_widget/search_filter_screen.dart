@@ -41,8 +41,8 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // Setting location here so that there's a default option selected
-    _searchOptions = SearchOptions(location: widget.locations.first);
+    // Setting location/order here so that there's a default option selected
+    _searchOptions = SearchOptions(location: widget.locations.first, order: widget.order.first);
 
 //    _searchOptions = SearchOptions();
     // Once you retrieved the categories, call setState since the UI is changing.
@@ -139,7 +139,28 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                           _searchOptions.order = selection;
                         });
                       },
-                    )
+                    ),
+                  SizedBox(height: 30),
+                  Text(
+                    'Sort by:',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  Wrap(
+                    spacing: 10.0,
+                    children: widget.sort
+                        .map<ChoiceChip>((sort) => ChoiceChip(
+                              label: Text(sort),
+                              selected: _searchOptions.sort == sort,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _searchOptions.sort = sort;
+                                  });
+                                }
+                              },
+                            ))
+                        .toList(),
+                  )
                 ],
               ),
             ),
