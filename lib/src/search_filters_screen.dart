@@ -1,7 +1,36 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_search/main.dart';
-import 'package:restaurant_search/model/category.dart';
-import 'package:restaurant_search/model/search_options.dart';
+
+class Category {
+  final int id;
+  final String name;
+
+  const Category({this.id, this.name});
+}
+
+class SearchOptions {
+  String location;
+  String order;
+  String sort;
+  double count;
+  List<int> categories = [];
+
+  SearchOptions({
+    this.location,
+    this.order,
+    this.sort,
+    this.count,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'location': location,
+        'sort': sort,
+        'order': order,
+        'count': count,
+        // .join here because the API expects the categories to be separated with a comma
+        'category': categories.join(','),
+      };
+}
 
 class SearchFilterScreen extends StatefulWidget {
   // These are the options that can be used for filtering from the API
@@ -10,8 +39,12 @@ class SearchFilterScreen extends StatefulWidget {
   final order = ['asc', 'desc'];
   final double count = 20;
 
+  final Dio dio;
+
   @override
   _SearchFilterScreen createState() => _SearchFilterScreen();
+
+  SearchFilterScreen({this.dio});
 }
 
 class _SearchFilterScreen extends State<SearchFilterScreen> {
@@ -26,7 +59,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
   // https://developers.zomato.com/api/v2.1/categories
   // Look at the above for reference, might also want to look up the dio instance below
   Future<List<Category>> getCategories() async {
-    final response = await dio.get('categories');
+    final response = await widget.dio.get('categories');
     final data = response.data['categories'];
 
     // Map data's data into a new Category object for each object inside of data.
@@ -110,7 +143,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                           }),
                         )
                       : Center(child: CircularProgressIndicator()),
-                  SizedBox(height: 30),
+                  SizedBox(height: 15),
                   Text('Location Type',
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   DropdownButton<String>(
@@ -128,7 +161,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                       });
                     },
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 15),
                   Text('Order By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   // For look to determine how many RadioListTiles should exist
                   for (int idx = 0; idx < widget.order.length; idx++)
@@ -142,7 +175,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                         });
                       },
                     ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 15),
                   Text(
                     'Sort by:',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
@@ -163,7 +196,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                             ))
                         .toList(),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 15),
                   Text(
                     '# of results to show:',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
