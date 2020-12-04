@@ -2,4 +2,4 @@
 const kLocations = ['city', 'subzone', 'zone', 'landmark', 'metro', 'group'];
 const kSort = ['cost', 'rating'];
 const kOrder = ['asc', 'desc'];
-const double kCount = 20;
+const double kMaxCount = 20;

@@ -86,6 +86,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final zomatoApi = Provider.of<ZomatoApi>(context);
     final state = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
@@ -145,7 +146,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                   DropdownButton<String>(
                     isExpanded: true,
                     value: state.searchOptions.location,
-                    items: widget.locations
+                    items: zomatoApi.locations
                         .map<DropdownMenuItem<String>>((location) => DropdownMenuItem<String>(
                               value: location,
                               child: Text(location),
@@ -160,10 +161,10 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                   SizedBox(height: 15),
                   Text('Order By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   // For look to determine how many RadioListTiles should exist
-                  for (int idx = 0; idx < widget.order.length; idx++)
+                  for (int idx = 0; idx < zomatoApi.order.length; idx++)
                     RadioListTile(
-                      title: Text(widget.order[idx]),
-                      value: widget.order[idx],
+                      title: Text(zomatoApi.order[idx]),
+                      value: zomatoApi.order[idx],
                       groupValue: state.searchOptions.order,
                       onChanged: (selection) {
                         setState(() {
@@ -178,7 +179,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                   ),
                   Wrap(
                     spacing: 10.0,
-                    children: widget.sort
+                    children: zomatoApi.sort
                         .map<ChoiceChip>((sort) => ChoiceChip(
                               label: Text(sort),
                               selected: state.searchOptions.sort == sort,
@@ -200,7 +201,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                   Slider(
                     value: state.searchOptions.count ?? 5,
                     min: 5,
-                    max: widget.count,
+                    max: zomatoApi.count,
                     // The .round converts the double into an int that way the .0 doesn't show in the slider
                     label: state.searchOptions.count?.round().toString(),
                     divisions: 3,

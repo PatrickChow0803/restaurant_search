@@ -6,6 +6,13 @@ class AppState {
     location: kLocations.first,
     order: kOrder.first,
     sort: kSort.first,
-    count: kCount,
+    count: kMaxCount,
   );
+}
+
+class ZomatoApi {
+  final List<String> locations = kLocations;
+  final List<String> sort = kSort;
+  final List<String> order = kOrder;
+  final double count = kMaxCount;
 }
