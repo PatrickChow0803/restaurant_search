@@ -1,5 +1,6 @@
 class SearchOptions {
+  String location;
   List<int> categories = [];
 
-  SearchOptions();
+  SearchOptions({this.location});
 }

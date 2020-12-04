@@ -4,6 +4,11 @@ import 'package:restaurant_search/model/category.dart';
 import 'package:restaurant_search/model/search_options.dart';
 
 class SearchFilterScreen extends StatefulWidget {
+  // These are the options that can be used for filtering from the API
+  final locations = ['city', 'subzone', 'zone', 'landmark', 'metro', 'group'];
+  final sort = ['cost', 'rating'];
+  final order = ['asc', 'desc'];
+
   @override
   _SearchFilterScreen createState() => _SearchFilterScreen();
 }
@@ -11,7 +16,7 @@ class SearchFilterScreen extends StatefulWidget {
 class _SearchFilterScreen extends State<SearchFilterScreen> {
   List<Category> _categories;
 
-  SearchOptions _searchOptions = SearchOptions();
+  SearchOptions _searchOptions;
 
   // Type is int because _categories.id is an int
   // Therefore this _selectedCategories contains a list of category ids
@@ -36,6 +41,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _searchOptions = SearchOptions(location: widget.locations.first);
 
 //    _searchOptions = SearchOptions();
     // Once you retrieved the categories, call setState since the UI is changing.
@@ -100,10 +106,25 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                             );
                           }),
                         )
-                      : Container(
-                          height: MediaQuery.of(context).size.height * .70,
-//                          width: double.infinity,
-                          child: Center(child: CircularProgressIndicator())),
+                      : Center(child: CircularProgressIndicator()),
+                  SizedBox(height: 30),
+                  Text('Location Type',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    isExpanded: true,
+                    value: _searchOptions.location,
+                    items: widget.locations
+                        .map<DropdownMenuItem<String>>((location) => DropdownMenuItem<String>(
+                              value: location,
+                              child: Text(location),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchOptions.location = value;
+                      });
+                    },
+                  )
                 ],
               ),
             ),
