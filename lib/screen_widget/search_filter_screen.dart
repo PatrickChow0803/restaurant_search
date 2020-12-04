@@ -8,6 +8,7 @@ class SearchFilterScreen extends StatefulWidget {
   final locations = ['city', 'subzone', 'zone', 'landmark', 'metro', 'group'];
   final sort = ['cost', 'rating'];
   final order = ['asc', 'desc'];
+  final double count = 20;
 
   @override
   _SearchFilterScreen createState() => _SearchFilterScreen();
@@ -42,7 +43,8 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
     // TODO: implement initState
     super.initState();
     // Setting location/order here so that there's a default option selected
-    _searchOptions = SearchOptions(location: widget.locations.first, order: widget.order.first);
+    _searchOptions = SearchOptions(
+        location: widget.locations.first, order: widget.order.first, count: widget.count);
 
 //    _searchOptions = SearchOptions();
     // Once you retrieved the categories, call setState since the UI is changing.
@@ -160,6 +162,24 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                               },
                             ))
                         .toList(),
+                  ),
+                  SizedBox(height: 30),
+                  Text(
+                    '# of results to show:',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  Slider(
+                    value: _searchOptions.count ?? 5,
+                    min: 5,
+                    max: widget.count,
+                    // The .round converts the double into an int that way the .0 doesn't show in the slider
+                    label: _searchOptions.count?.round().toString(),
+                    divisions: 3,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchOptions.count = value;
+                      });
+                    },
                   )
                 ],
               ),
