@@ -41,6 +41,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Setting location here so that there's a default option selected
     _searchOptions = SearchOptions(location: widget.locations.first);
 
 //    _searchOptions = SearchOptions();
@@ -124,7 +125,21 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                         _searchOptions.location = value;
                       });
                     },
-                  )
+                  ),
+                  SizedBox(height: 30),
+                  Text('Order By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  // For look to determine how many RadioListTiles should exist
+                  for (int idx = 0; idx < widget.order.length; idx++)
+                    RadioListTile(
+                      title: Text(widget.order[idx]),
+                      value: widget.order[idx],
+                      groupValue: _searchOptions.order,
+                      onChanged: (selection) {
+                        setState(() {
+                          _searchOptions.order = selection;
+                        });
+                      },
+                    )
                 ],
               ),
             ),
