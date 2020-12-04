@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:restaurant_search/src/restaurant_item.dart';
 import 'package:restaurant_search/src/search_filters_screen.dart';
 import 'package:restaurant_search/src/search_form.dart';
 
 import '../main.dart';
+import 'app_state.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({Key key, this.title, this.dio}) : super(key: key);
@@ -25,12 +27,14 @@ class _SearchPage extends State<SearchPage> {
       'q': query,
       'sort': 'rating',
     });
-    print(response);
+//    print(response);
     return response.data['restaurants'];
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<AppState>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(

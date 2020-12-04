@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant_search/src/app_state.dart';
 
 class Category {
   final int id;
@@ -33,12 +35,6 @@ class SearchOptions {
 }
 
 class SearchFilterScreen extends StatefulWidget {
-  // These are the options that can be used for filtering from the API
-  final locations = ['city', 'subzone', 'zone', 'landmark', 'metro', 'group'];
-  final sort = ['cost', 'rating'];
-  final order = ['asc', 'desc'];
-  final double count = 20;
-
   final Dio dio;
 
   @override
@@ -49,8 +45,6 @@ class SearchFilterScreen extends StatefulWidget {
 
 class _SearchFilterScreen extends State<SearchFilterScreen> {
   List<Category> _categories;
-
-  SearchOptions _searchOptions;
 
   // Type is int because _categories.id is an int
   // Therefore this _selectedCategories contains a list of category ids
@@ -76,8 +70,8 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
     // TODO: implement initState
     super.initState();
     // Setting location/order here so that there's a default option selected
-    _searchOptions = SearchOptions(
-        location: widget.locations.first, order: widget.order.first, count: widget.count);
+//    _searchOptions = SearchOptions(
+//        location: widget.locations.first, order: widget.order.first, count: widget.count);
 
 //    _searchOptions = SearchOptions();
     // Once you retrieved the categories, call setState since the UI is changing.
@@ -92,9 +86,11 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Filter your search'),
+        backgroundColor: Colors.red,
       ),
       body: Container(
         // For scrolling functionality
@@ -118,7 +114,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                           spacing: 10,
                           children: List<Widget>.generate(_categories.length, (index) {
                             final category = _categories[index];
-                            final isSelected = _searchOptions.categories.contains(category.id);
+                            final isSelected = state.searchOptions.categories.contains(category.id);
                             return FilterChip(
                               label: Text(category.name),
                               labelStyle: TextStyle(
@@ -133,9 +129,9 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                               onSelected: (bool selected) {
                                 setState(() {
                                   if (selected)
-                                    _searchOptions.categories.add(category.id);
+                                    state.searchOptions.categories.add(category.id);
                                   else {
-                                    _searchOptions.categories.remove(category.id);
+                                    state.searchOptions.categories.remove(category.id);
                                   }
                                 });
                               },
@@ -148,7 +144,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   DropdownButton<String>(
                     isExpanded: true,
-                    value: _searchOptions.location,
+                    value: state.searchOptions.location,
                     items: widget.locations
                         .map<DropdownMenuItem<String>>((location) => DropdownMenuItem<String>(
                               value: location,
@@ -157,7 +153,7 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                         .toList(),
                     onChanged: (value) {
                       setState(() {
-                        _searchOptions.location = value;
+                        state.searchOptions.location = value;
                       });
                     },
                   ),
@@ -168,10 +164,10 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                     RadioListTile(
                       title: Text(widget.order[idx]),
                       value: widget.order[idx],
-                      groupValue: _searchOptions.order,
+                      groupValue: state.searchOptions.order,
                       onChanged: (selection) {
                         setState(() {
-                          _searchOptions.order = selection;
+                          state.searchOptions.order = selection;
                         });
                       },
                     ),
@@ -185,11 +181,11 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                     children: widget.sort
                         .map<ChoiceChip>((sort) => ChoiceChip(
                               label: Text(sort),
-                              selected: _searchOptions.sort == sort,
+                              selected: state.searchOptions.sort == sort,
                               onSelected: (selected) {
                                 if (selected) {
                                   setState(() {
-                                    _searchOptions.sort = sort;
+                                    state.searchOptions.sort = sort;
                                   });
                                 }
                               },
@@ -202,15 +198,15 @@ class _SearchFilterScreen extends State<SearchFilterScreen> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   Slider(
-                    value: _searchOptions.count ?? 5,
+                    value: state.searchOptions.count ?? 5,
                     min: 5,
                     max: widget.count,
                     // The .round converts the double into an int that way the .0 doesn't show in the slider
-                    label: _searchOptions.count?.round().toString(),
+                    label: state.searchOptions.count?.round().toString(),
                     divisions: 3,
                     onChanged: (value) {
                       setState(() {
-                        _searchOptions.count = value;
+                        state.searchOptions.count = value;
                       });
                     },
                   )
