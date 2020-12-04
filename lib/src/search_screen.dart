@@ -21,11 +21,11 @@ class SearchPage extends StatefulWidget {
 class _SearchPage extends State<SearchPage> {
   String query;
 
-  Future<List> searchRestaurants(String query) async {
+  Future<List> searchRestaurants(String query, SearchOptions options) async {
     // pass in an empty string here because the BaseOptions already has the baseUrl
     final response = await widget.dio.get('search', queryParameters: {
       'q': query,
-      'sort': 'rating',
+      ...(options != null ? options.toJson() : {}),
     });
 //    print(response);
     return response.data['restaurants'];
@@ -87,7 +87,7 @@ class _SearchPage extends State<SearchPage> {
                     ),
                   )
                 : FutureBuilder(
-                    future: searchRestaurants(query),
+                    future: searchRestaurants(query, state.searchOptions),
                     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Expanded(child: Center(child: CircularProgressIndicator()));

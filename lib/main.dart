@@ -8,10 +8,11 @@ import 'package:restaurant_search/src/search_screen.dart';
 
 void main() async {
   await DotEnv().load('.env');
+  final api = ZomatoApi(DotEnv().env['ZOMATO_API_KEY']);
   runApp(MultiProvider(
     // Create is the data that you want to pass down the widget tree
     providers: [
-      Provider(create: (context) => ZomatoApi()),
+      Provider(create: (context) => api),
       Provider(create: (context) => AppState()),
     ],
 
